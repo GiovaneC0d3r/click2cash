@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: clickcash
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clickcash"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio_s3
+    restart: always
+    ports:
+      - "9000:9000" # API S3 (Usada no seu .env)
+      - "9001:9001" # Console/Painel Web
+    environment:
+      MINIO_ROOT_USER: minioadmin # Seu MINIO_ACCESS_KEY
+      MINIO_ROOT_PASSWORD: minioadmin # Seu MINIO_SECRET_KEY
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+volumes:
+  postgres_data:
+  minio_data:
